@@ -1,46 +1,43 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    CreateDateColumn,
-    UpdateDateColumn,
-    ManyToOne,
-    JoinColumn,
-    Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+} from "typeorm";
+import { Threads } from "./Threads";
+import { User } from "./User";
 
-} from "typeorm"
-import {Threads} from "./Threads"
-import {User} from "./User"
+@Entity({ name: "Reply" })
+export class Reply {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-@Entity({name: "Reply"})
-export class Reply{
+  @Column()
+  text: string;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column({ nullable: true })
+  image: string;
 
-    @Column()
-    text: string;
+  @CreateDateColumn()
+  created_at: Date;
 
-    @Column()
-    image: string;
+  @UpdateDateColumn()
+  updated_at: Date;
 
-    @CreateDateColumn()
-    created_at: Date;
+  @ManyToOne(() => Threads, (thread) => thread.reply, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "thread_id" })
+  thread: Threads;
 
-    @UpdateDateColumn()
-    updated_at: Date;
-
-    @ManyToOne(() => Threads, (thread) => thread.reply, {
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-    })
-    @JoinColumn({name: "thread_id"})
-    thread: Threads;
-
-    @ManyToOne(() => User, (user) => user.reply, {
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE"
-    })
-    @JoinColumn({name: "user_id"})
-    user: User
-
+  @ManyToOne(() => User, (user) => user.reply, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "user_id" })
+  user: User;
 }

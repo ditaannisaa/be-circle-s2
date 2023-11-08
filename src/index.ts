@@ -4,7 +4,6 @@ import ThreadsRouter from "./route/threadRoute";
 import UserRouter from "./route/userRoute";
 import RepliesRouter from "./route/repliesRoute";
 import LikesRouter from "./route/likesRoute";
-import FollowRouter from "./route/followRoute";
 import AuthRouter from "./route/authRoute";
 
 import cors = require("cors");
@@ -20,7 +19,6 @@ AppDataSource.initialize()
     app.use("/api/v1", UserRouter);
     app.use("/api/v1", RepliesRouter);
     app.use("/api/v1", LikesRouter);
-    app.use("/api/v1", FollowRouter);
     app.use("/api/v1", AuthRouter);
 
     app.listen(port, () => console.log(`Server listening on port ${port}`));

@@ -15,11 +15,7 @@ export default new (class ThreadService {
   async find(req: Request, res: Response): Promise<Response> {
     try {
       const findThreads = await this.ThreadRepository.find({
-        relations: {
-          user: true,
-          reply: true,
-          like: true,
-        },
+        relations: ["user", "reply", "like.user"],
         order: { id: "DESC" },
       });
 
@@ -34,11 +30,7 @@ export default new (class ThreadService {
       const id: number = Number(req.params.id);
       const thread = await this.ThreadRepository.findOne({
         where: { id: id },
-        relations: {
-          user: true,
-          reply: true,
-          like: true,
-        },
+        relations: ["user", "reply.user", "like.user"],
       });
 
       return res.status(200).json(thread);

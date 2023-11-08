@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
 } from "typeorm";
 import { Threads } from "./Threads";
 import { Reply } from "./Reply";
@@ -64,17 +65,34 @@ export class User {
   @JoinColumn()
   like: Likes[];
 
-  @OneToMany(() => Follow, (follow) => follow.follower_id, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
+  @ManyToMany(() => User, (user) => user.following)
+  @JoinTable({
+    name: "followers",
+    joinColumn: {
+      name: "follower_id",
+      referencedColumnName: "id",
+    },
+    inverseJoinColumn: {
+      name: "following_id",
+      referencedColumnName: "id",
+    },
   })
-  @JoinColumn()
-  follower: User[];
+  followers: User[];
 
-  @OneToMany(() => Follow, (follow) => follow.following_id, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-  })
-  @JoinColumn()
+  @ManyToMany(() => User, (user) => user.followers)
   following: User[];
+
+  // @OneToMany(() => Follow, (follow) => follow.follower_id, {
+  //   onDelete: "CASCADE",
+  //   onUpdate: "CASCADE",
+  // })
+  // @JoinColumn()
+  // follower: User[];
+
+  // @OneToMany(() => Follow, (follow) => follow.following_id, {
+  //   onDelete: "CASCADE",
+  //   onUpdate: "CASCADE",
+  // })
+  // @JoinColumn()
+  // following: User[];
 }

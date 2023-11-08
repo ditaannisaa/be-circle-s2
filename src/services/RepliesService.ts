@@ -7,10 +7,13 @@ import {
   RepliesSchemaValidate,
   UpdateRepliesSchemaValidate,
 } from "../utils/validate/RepliesSchema";
+import { v2 as cloudinary } from "cloudinary";
 
 export default new (class RepliesService {
   private readonly RepliesRepository: Repository<Reply> =
     AppDataSource.getRepository(Reply);
+  private readonly ThreadRepository: Repository<Threads> =
+    AppDataSource.getRepository(Threads);
 
   async find(req: Request, res: Response): Promise<Response> {
     try {
@@ -30,18 +33,47 @@ export default new (class RepliesService {
   async create(req: Request, res: Response): Promise<Response> {
     try {
       const body = req.body;
+      const image = res.locals.filename;
+      let imagesrc;
 
-      const { error } = RepliesSchemaValidate.validate(body);
+      const data = {
+        text: body.text,
+        image: image,
+        thread: body.thread,
+        user: res.locals.loginSession.user.id,
+      };
+
+      const { error } = RepliesSchemaValidate.validate(data);
       if (error) {
         return res.status(400).json({ error });
       }
 
-      const newReply = this.RepliesRepository.create(body);
+      //connecting to cloudinary
+      cloudinary.config({
+        cloud_name: "dwuwsanew",
+        api_key: "321989199898163",
+        api_secret: "-NYynVZ1TiykXgnGCvr2GRyhGtM",
+      });
 
-      await this.RepliesRepository.save(newReply);
+      if (image) {
+        const cloudinaryResponse = await cloudinary.uploader.upload(
+          "src/uploads/" + image,
+          { folder: "circle-app" }
+        );
+        imagesrc = cloudinaryResponse.secure_url;
+      }
+
+      const createReply = this.RepliesRepository.create({
+        text: data.text,
+        image: imagesrc,
+        thread: data.thread,
+        user: res.locals.loginSession.user.id,
+      });
+
+      const newReply = await this.RepliesRepository.save(createReply);
       return res.status(201).json({ data: newReply });
     } catch (err) {
-      return res.status(500).json({ error: "Create reply error" });
+      return res.status(500).json({ error: `${err}` });
     }
   }
 

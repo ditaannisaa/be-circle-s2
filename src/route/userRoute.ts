@@ -17,5 +17,6 @@ router.delete(
   AuthMiddleware.Authentication,
   UserControllers.delete
 );
+router.post("/follow", AuthMiddleware.Authentication, UserControllers.follow);
 
 export default router;

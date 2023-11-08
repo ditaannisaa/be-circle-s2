@@ -21,5 +21,9 @@ export default new (class UserController {
     delete(req: Request, res: Response) {
         UserService.delete(req, res);
     }
+
+    follow(req: Request, res: Response) {
+        UserService.follow(req, res);
+    }
 }
 )

@@ -11,12 +11,7 @@ export default new (class UserService {
   async find(req: Request, res: Response): Promise<Response> {
     try {
       const users = await this.UserRepository.find({
-        relations: {
-          threads: true,
-          reply: true,
-          follower: true,
-          following: true,
-        },
+        relations: ["threads", "reply", "followers", "following", "like"],
       });
       return res.status(200).json(users);
     } catch (error) {
@@ -52,7 +47,10 @@ export default new (class UserService {
   async findOne(req: Request, res: Response): Promise<Response> {
     try {
       const id: number = Number(req.params.id);
-      const user = await this.UserRepository.findOneBy({ id });
+      const user = await this.UserRepository.findOne({
+        where: { id },
+        relations: ["threads", "reply", "followers", "following", "like"],
+      });
 
       return res.status(200).json(user);
     } catch (err) {
@@ -98,6 +96,51 @@ export default new (class UserService {
       return res.status(200).json(findUser);
     } catch (err) {
       return res.status(500).json({ error: "delete user error" });
+    }
+  }
+  async follow(req: Request, res: Response): Promise<Response> {
+    try {
+      const loginSession = res.locals.loginSession;
+      const followingId = Number(req.body.followingId);
+
+      const follower = await this.UserRepository.findOne({
+        where: {
+          id: loginSession.user.id,
+        },
+        relations: ["following"],
+      });
+
+      const following = await this.UserRepository.findOne({
+        where: {
+          id: followingId,
+        },
+      });
+
+      if (!follower || !following) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      if (loginSession.user.id == followingId) {
+        return res.status(404).json({ error: "Cannot follow yourself " });
+      }
+
+      const isFollowing = follower.following.some(
+        (user) => user.id === following.id
+      );
+
+      if (isFollowing) {
+        //if already followed, unfollow
+        follower.following = follower.following.filter(
+          (user) => user.id !== following.id
+        );
+      } else {
+        //doesn't follow yet
+        follower.following.push(following);
+      }
+
+      await this.UserRepository.save(follower);
+      return res.status(200).json(follower);
+    } catch (err) {
+      return res.status(500).json({ error: "cannot follow" });
     }
   }
 })();

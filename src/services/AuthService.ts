@@ -110,6 +110,7 @@ export default new (class AuthService {
         where: {
           id: loginSession.user.id,
         },
+        relations: ["followers", "following", "reply", "like"],
       });
 
       return res.status(200).json({
